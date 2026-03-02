@@ -42,12 +42,12 @@ export default function Landing() {
         <h2 style={styles.sectionTitle}>Explora por categoría</h2>
         <div style={styles.catGrid}>
           {[
-            { icon: "🎵", label: "Conciertos" },
-            { icon: "⚽", label: "Deportes" },
-            { icon: "🎭", label: "Teatro" },
-            { icon: "🎪", label: "Festivales" },
+            { icon: "🎵", label: "Conciertos", value: "concierto" },
+            { icon: "⚽", label: "Deportes",   value: "deporte" },
+            { icon: "🎭", label: "Teatro",     value: "teatro" },
+            { icon: "🎪", label: "Festivales", value: "festival" },
           ].map((c) => (
-            <Link to={`/eventos?categoria=${c.label.toLowerCase()}`} key={c.label} style={styles.catCard}>
+            <Link to={`/eventos?categoria=${c.value}`} key={c.label} style={styles.catCard}>
               <span style={styles.catIcon}>{c.icon}</span>
               <span style={styles.catLabel}>{c.label}</span>
             </Link>
