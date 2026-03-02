@@ -20,7 +20,10 @@ export default function App() {
 
   useEffect(() => {
     const stored = localStorage.getItem("boletealo_user")
-    if (stored) setUser(JSON.parse(stored))
+    if (stored) {
+      try { setUser(JSON.parse(stored)) }
+      catch { localStorage.removeItem("boletealo_user") }
+    }
   }, [])
 
   const handleLogin = (userData, token) => {
