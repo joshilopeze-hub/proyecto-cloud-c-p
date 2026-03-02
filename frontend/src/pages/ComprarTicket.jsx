@@ -31,9 +31,11 @@ export default function ComprarTicket() {
   useEffect(() => {
     eventosApi.get(eventoId)
       .then((res) => {
-        setEvento(res.evento || res)
-        if (res.evento?.zonas?.length > 0) setZonaSeleccionada(res.evento.zonas[0])
-        else if (res.zonas?.length > 0) setZonaSeleccionada(res.zonas[0])
+        // La API puede devolver { evento: {...} } o el objeto directo
+        const ev = res.evento || res
+        setEvento(ev)
+        const zonas = ev.zonas || []
+        if (zonas.length > 0) setZonaSeleccionada(zonas[0])
       })
       .catch(() => setError("No se pudo cargar el evento"))
       .finally(() => setLoading(false))
@@ -44,9 +46,13 @@ export default function ComprarTicket() {
     setLoading(true)
     try {
       const res = await ticketsApi.buy({
-        evento_id: eventoId,
+        evento_id: evento.evento_id || eventoId,
+        evento_nombre: evento.nombre || evento.evento_nombre || "",
+        evento_fecha: evento.fecha || evento.evento_fecha || "",
+        evento_lugar: evento.lugar || evento.evento_lugar || "",
         zona: zonaSeleccionada.nombre,
         cantidad,
+        precio_unit: Number(zonaSeleccionada.precio),
       })
       if (res.ticket) {
         setTicket(res.ticket)
