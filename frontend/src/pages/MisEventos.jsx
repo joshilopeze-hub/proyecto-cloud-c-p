@@ -34,15 +34,14 @@ export default function MisEventos() {
       .finally(() => setLoading(false))
   }, [])
 
-  const handleToggle = async (eventoId, estadoActual) => {
-    const accion = estadoActual === "activo" ? "desactivar" : "activar"
+  const handleToggle = async (eventoId, activoActual) => {
+    const accion = activoActual ? "desactivar" : "activar"
     if (!window.confirm(`¿Seguro que quieres ${accion} este evento?`)) return
     try {
       const res = await eventosApi.toggle(eventoId)
-      if (res.estado !== undefined || res.evento) {
-        const nuevoEstado = res.estado || res.evento?.estado
+      if (res.activo !== undefined) {
         setEventos((prev) =>
-          prev.map((ev) => ev.eventoId === eventoId ? { ...ev, estado: nuevoEstado } : ev)
+          prev.map((ev) => ev.eventoId === eventoId ? { ...ev, activo: res.activo } : ev)
         )
       } else {
         alert(res.error || "No se pudo cambiar el estado")
@@ -87,7 +86,7 @@ export default function MisEventos() {
 }
 
 function EventoCard({ evento, onToggle }) {
-  const activo = evento.estado === "activo"
+  const activo = evento.activo === true
   const catColor = CATEGORIA_COLOR[evento.categoria] || "#64748b"
   const totalDisponibles = (evento.zonas || []).reduce(
     (acc, z) => acc + (Number(z.disponibles) || 0), 0
@@ -159,7 +158,7 @@ function EventoCard({ evento, onToggle }) {
         {/* Acciones */}
         <div style={styles.cardFooter}>
           <button
-            onClick={() => onToggle(evento.eventoId, evento.estado)}
+            onClick={() => onToggle(evento.eventoId, evento.activo)}
             style={{
               ...styles.btnToggle,
               color: activo ? "#f59e0b" : "#22c55e",
