@@ -40,6 +40,14 @@ functions:
           path: /tickets/{ticketId}
           method: GET
 
+  cancelTicket:
+    handler: handler.cancel_ticket
+    timeout: 15
+    events:
+      - httpApi:
+          path: /tickets/{ticketId}
+          method: DELETE
+
 resources:
   Resources:
     TicketsTable:

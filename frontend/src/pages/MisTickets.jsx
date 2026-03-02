@@ -2,6 +2,13 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { ticketsApi } from "../config/api"
 
+function formatFecha(fecha) {
+  if (!fecha) return ""
+  const [y, m, d] = fecha.split("-")
+  const meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
+  return `${d} ${meses[parseInt(m, 10) - 1]} ${y}`
+}
+
 export default function MisTickets() {
   const [tickets, setTickets] = useState([])
   const [loading, setLoading] = useState(true)
@@ -14,6 +21,22 @@ export default function MisTickets() {
       .catch(() => setError("No se pudieron cargar tus tickets"))
       .finally(() => setLoading(false))
   }, [])
+
+  const handleCancelar = async (ticketId) => {
+    if (!window.confirm("¿Estás seguro de que quieres cancelar este ticket?")) return
+    try {
+      const res = await ticketsApi.cancel(ticketId)
+      if (res.message) {
+        setTickets((prev) =>
+          prev.map((t) => t.ticket_id === ticketId ? { ...t, estado: "cancelado" } : t)
+        )
+      } else {
+        alert(res.error || "No se pudo cancelar el ticket")
+      }
+    } catch {
+      alert("Error de conexión al cancelar")
+    }
+  }
 
   return (
     <div style={styles.page}>
@@ -36,18 +59,24 @@ export default function MisTickets() {
 
       <div style={styles.list}>
         {tickets.map((ticket) => (
-          <TicketCard key={ticket.ticket_id} ticket={ticket} navigate={navigate} />
+          <TicketCard
+            key={ticket.ticket_id}
+            ticket={ticket}
+            navigate={navigate}
+            onCancelar={handleCancelar}
+          />
         ))}
       </div>
     </div>
   )
 }
 
-function TicketCard({ ticket, navigate }) {
-  const estadoColor = ticket.estado === "activo" ? "#22c55e" : "#aaa"
+function TicketCard({ ticket, navigate, onCancelar }) {
+  const activo = ticket.estado === "activo"
+  const estadoColor = activo ? "#22c55e" : "#aaa"
 
   return (
-    <div style={styles.card}>
+    <div style={{ ...styles.card, opacity: activo ? 1 : 0.7 }}>
       <div style={styles.cardLeft}>
         <div style={styles.qrArea}>
           <span style={styles.qrText}>{ticket.qr_code}</span>
@@ -59,19 +88,29 @@ function TicketCard({ ticket, navigate }) {
           <h3 style={styles.cardTitle}>{ticket.evento_nombre}</h3>
           <span style={{ ...styles.estadoBadge, color: estadoColor }}>● {ticket.estado}</span>
         </div>
-        <p style={styles.info}>📅 {ticket.evento_fecha}</p>
+        <p style={styles.info}>📅 {formatFecha(ticket.evento_fecha)}</p>
         <p style={styles.info}>📍 {ticket.evento_lugar}</p>
         <p style={styles.info}>🪑 Zona: {ticket.zona} · x{ticket.cantidad}</p>
         <div style={styles.cardFooter}>
           <span style={styles.precio}>S/ {Number(ticket.precio_total).toFixed(2)}</span>
-          {ticket.estado === "activo" && (
-            <button
-              onClick={() => navigate(`/reportar/${ticket.ticket_id}`)}
-              style={styles.btnReport}
-            >
-              ⚠️ Reportar incidente
-            </button>
-          )}
+          <div style={styles.actions}>
+            {activo && (
+              <>
+                <button
+                  onClick={() => navigate(`/reportar/${ticket.ticket_id}`)}
+                  style={styles.btnReport}
+                >
+                  ⚠️ Reportar
+                </button>
+                <button
+                  onClick={() => onCancelar(ticket.ticket_id)}
+                  style={styles.btnCancelar}
+                >
+                  ✕ Cancelar
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -102,7 +141,7 @@ const styles = {
   cardLeft: {
     background: "#0f3460", width: "100px", display: "flex",
     flexDirection: "column", alignItems: "center", justifyContent: "center",
-    padding: "1rem", borderRight: "2px dashed #1a4a8a",
+    padding: "1rem", borderRight: "2px dashed #1a4a8a", flexShrink: 0,
   },
   qrArea: { textAlign: "center" },
   qrText: { display: "block", color: "#e94560", fontSize: "0.7rem", fontWeight: "bold", wordBreak: "break-all" },
@@ -114,8 +153,13 @@ const styles = {
   info: { color: "#aaa", fontSize: "0.88rem", marginBottom: "0.3rem" },
   cardFooter: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1rem" },
   precio: { color: "#e94560", fontWeight: "bold", fontSize: "1.1rem" },
+  actions: { display: "flex", gap: "0.5rem" },
   btnReport: {
     background: "transparent", color: "#f59e0b", border: "1px solid #f59e0b",
+    padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "0.85rem",
+  },
+  btnCancelar: {
+    background: "transparent", color: "#ff6b6b", border: "1px solid #ff6b6b",
     padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "0.85rem",
   },
 }

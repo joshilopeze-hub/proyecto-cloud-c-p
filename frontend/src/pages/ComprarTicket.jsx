@@ -4,6 +4,13 @@ import { eventosApi, ticketsApi, pagosApi } from "../config/api"
 
 const STEPS = ["Evento", "Ticket", "Pago", "Confirmación"]
 
+function formatFecha(fecha) {
+  if (!fecha) return ""
+  const [y, m, d] = fecha.split("-")
+  const meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
+  return `${d} ${meses[parseInt(m, 10) - 1]} ${y}`
+}
+
 export default function ComprarTicket() {
   const { eventoId } = useParams()
   const navigate = useNavigate()
@@ -110,7 +117,7 @@ export default function ComprarTicket() {
         {step === 0 && (
           <div style={styles.card}>
             <h2 style={styles.cardTitle}>{evento.nombre}</h2>
-            <p style={styles.info}>📅 {evento.fecha}</p>
+            <p style={styles.info}>📅 {formatFecha(evento.fecha)} · {evento.hora}</p>
             <p style={styles.info}>📍 {evento.lugar}, {evento.ciudad}</p>
             <p style={styles.info}>🎤 {evento.artista || evento.descripcion}</p>
             <button onClick={() => setStep(1)} style={styles.btn}>Seleccionar tickets →</button>
@@ -131,7 +138,9 @@ export default function ComprarTicket() {
                 >
                   <strong>{z.nombre}</strong>
                   <span>S/ {Number(z.precio).toFixed(2)}</span>
-                  <small>{z.capacidad} disponibles</small>
+                  <small style={{ color: Number(z.disponibles) < 20 ? "#f59e0b" : "#22c55e" }}>
+                    {Number(z.disponibles) > 0 ? `${z.disponibles} disponibles` : "Agotado"}
+                  </small>
                 </div>
               ))}
             </div>

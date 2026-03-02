@@ -84,6 +84,12 @@ export const ticketsApi = {
     safeFetch(`${API.tickets}/tickets/${ticketId}`, {
       headers: getHeaders(),
     }),
+
+  cancel: (ticketId) =>
+    safeFetch(`${API.tickets}/tickets/${ticketId}`, {
+      method: "DELETE",
+      headers: getHeaders(),
+    }),
 }
 
 // ── Pagos ─────────────────────────────────────────────────────

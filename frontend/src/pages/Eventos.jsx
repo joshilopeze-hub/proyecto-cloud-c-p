@@ -61,26 +61,36 @@ export default function Eventos() {
   )
 }
 
-function EventoCard({ evento }) {
-  const precioMin = evento.zonas
-    ? Math.min(...evento.zonas.map((z) => Number(z.precio)))
-    : evento.precio || 0
+function formatFecha(fecha) {
+  if (!fecha) return ""
+  const [y, m, d] = fecha.split("-")
+  const meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
+  return `${d} ${meses[parseInt(m, 10) - 1]} ${y}`
+}
 
-  const categoriaEmoji = {
-    concierto: "🎵",
-    deporte: "⚽",
-    teatro: "🎭",
-    festival: "🎪",
-  }[evento.categoria] || "🎟️"
+function EventoCard({ evento }) {
+  const zonas = evento.zonas || []
+  const precioMin = zonas.length
+    ? Math.min(...zonas.map((z) => Number(z.precio)))
+    : evento.precio || 0
+  const totalDisponibles = zonas.reduce((acc, z) => acc + (Number(z.disponibles) || 0), 0)
+
+  const categoriaEmoji = { concierto:"🎵", deporte:"⚽", teatro:"🎭", festival:"🎪" }[evento.categoria] || "🎟️"
+  const categoriaBg    = { concierto:"#3d1a4a", deporte:"#1a3a1a", teatro:"#2a1a3a", festival:"#3a2a0a" }[evento.categoria] || "#0f3460"
 
   return (
     <div style={styles.card}>
-      <div style={styles.cardBanner}>
+      <div style={{ ...styles.cardBanner, background: categoriaBg }}>
         <span style={styles.catBadge}>{categoriaEmoji} {evento.categoria}</span>
+        {totalDisponibles > 0 && (
+          <span style={totalDisponibles < 50 ? styles.disponiblesBajo : styles.disponibles}>
+            {totalDisponibles.toLocaleString()} entradas disponibles
+          </span>
+        )}
       </div>
       <div style={styles.cardBody}>
         <h3 style={styles.cardTitle}>{evento.nombre}</h3>
-        <p style={styles.cardInfo}>📅 {evento.fecha}</p>
+        <p style={styles.cardInfo}>📅 {formatFecha(evento.fecha)} · {evento.hora}</p>
         <p style={styles.cardInfo}>📍 {evento.lugar}, {evento.ciudad}</p>
         <p style={styles.cardInfo}>🎤 {evento.artista || evento.descripcion}</p>
         <div style={styles.cardFooter}>
@@ -110,8 +120,10 @@ const styles = {
     gap: "1.5rem", maxWidth: "1100px", margin: "0 auto",
   },
   card: { background: "#16213e", borderRadius: "12px", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.3)" },
-  cardBanner: { background: "#0f3460", padding: "1rem 1.25rem" },
+  cardBanner: { padding: "0.75rem 1.25rem", display: "flex", justifyContent: "space-between", alignItems: "center" },
   catBadge: { color: "#e94560", fontSize: "0.85rem", fontWeight: "bold", textTransform: "capitalize" },
+  disponibles: { color: "#22c55e", fontSize: "0.78rem", fontWeight: "bold" },
+  disponiblesBajo: { color: "#f59e0b", fontSize: "0.78rem", fontWeight: "bold" },
   cardBody: { padding: "1.25rem" },
   cardTitle: { color: "#fff", fontSize: "1.1rem", marginBottom: "0.75rem", lineHeight: 1.3 },
   cardInfo: { color: "#aaa", fontSize: "0.88rem", marginBottom: "0.4rem" },
