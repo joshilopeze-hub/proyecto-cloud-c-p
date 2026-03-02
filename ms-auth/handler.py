@@ -14,16 +14,16 @@ import time
 from datetime import datetime, timezone
 
 import boto3
-from boto3.dynamodb.conditions import Attr
 
 # ── Clientes AWS ──────────────────────────────────────────────
 dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
-ssm = boto3.client("ssm", region_name="us-east-1")
 
 USERS_TABLE = os.environ["USERS_TABLE"]
 JWT_SECRET  = os.environ.get("JWT_SECRET", "boletealo-secret-local")
 
 table = dynamodb.Table(USERS_TABLE)
+
+ROLES_VALIDOS = {"comprador", "vendedor"}
 
 
 # ── Helpers ───────────────────────────────────────────────────
@@ -51,13 +51,12 @@ def verify_password(password: str, stored: str) -> bool:
 
 
 def create_jwt(payload: dict) -> str:
-    """JWT manual (sin librería externa) — Header.Payload.Signature en base64url."""
-    header  = base64.urlsafe_b64encode(json.dumps({"alg": "HS256", "typ": "JWT"}).encode()).rstrip(b"=").decode()
+    header    = base64.urlsafe_b64encode(json.dumps({"alg": "HS256", "typ": "JWT"}).encode()).rstrip(b"=").decode()
     payload["iat"] = int(time.time())
     payload["exp"] = int(time.time()) + 86400  # 24h
-    body    = base64.urlsafe_b64encode(json.dumps(payload).encode()).rstrip(b"=").decode()
+    body      = base64.urlsafe_b64encode(json.dumps(payload).encode()).rstrip(b"=").decode()
     sig_input = f"{header}.{body}".encode()
-    sig     = hmac.new(JWT_SECRET.encode(), sig_input, hashlib.sha256).digest()
+    sig       = hmac.new(JWT_SECRET.encode(), sig_input, hashlib.sha256).digest()
     signature = base64.urlsafe_b64encode(sig).rstrip(b"=").decode()
     return f"{header}.{body}.{signature}"
 
@@ -65,7 +64,7 @@ def create_jwt(payload: dict) -> str:
 def decode_jwt(token: str) -> dict | None:
     try:
         header_b64, payload_b64, sig_b64 = token.split(".")
-        sig_input = f"{header_b64}.{payload_b64}".encode()
+        sig_input    = f"{header_b64}.{payload_b64}".encode()
         expected_sig = hmac.new(JWT_SECRET.encode(), sig_input, hashlib.sha256).digest()
         expected_b64 = base64.urlsafe_b64encode(expected_sig).rstrip(b"=").decode()
         if not hmac.compare_digest(sig_b64, expected_b64):
@@ -92,17 +91,21 @@ def get_token_from_event(event: dict) -> str | None:
 def register(event, context):
     """POST /auth/register — Registrar nuevo usuario."""
     try:
-        body = json.loads(event.get("body") or "{}")
-        nombre   = (body.get("nombre") or "").strip()
-        apellidos= (body.get("apellidos") or "").strip()
-        email    = (body.get("email") or "").strip().lower()
-        password = body.get("password") or ""
+        body      = json.loads(event.get("body") or "{}")
+        nombre    = (body.get("nombre") or "").strip()
+        apellidos = (body.get("apellidos") or "").strip()
+        email     = (body.get("email") or "").strip().lower()
+        password  = body.get("password") or ""
+        rol       = (body.get("rol") or "comprador").strip().lower()
 
         if not all([nombre, apellidos, email, password]):
-            return response(400, {"error": "Todos los campos son requeridos: nombre, apellidos, email, password"})
+            return response(400, {"error": "Campos requeridos: nombre, apellidos, email, password"})
 
         if len(password) < 6:
             return response(400, {"error": "La contraseña debe tener al menos 6 caracteres"})
+
+        if rol not in ROLES_VALIDOS:
+            return response(400, {"error": "El rol debe ser 'comprador' o 'vendedor'"})
 
         # Verificar email único
         existing = table.query(
@@ -113,7 +116,7 @@ def register(event, context):
             return response(409, {"error": "Este correo ya está registrado"})
 
         user_id = str(uuid.uuid4())
-        now = datetime.now(timezone.utc).isoformat()
+        now     = datetime.now(timezone.utc).isoformat()
 
         table.put_item(Item={
             "userId":    user_id,
@@ -121,15 +124,22 @@ def register(event, context):
             "nombre":    nombre,
             "apellidos": apellidos,
             "password":  hash_password(password),
+            "rol":       rol,
             "createdAt": now,
         })
 
-        token = create_jwt({"userId": user_id, "email": email, "nombre": nombre})
+        token = create_jwt({"userId": user_id, "email": email, "nombre": nombre, "rol": rol})
 
         return response(201, {
             "message": "Usuario registrado exitosamente",
             "token": token,
-            "user": {"userId": user_id, "email": email, "nombre": nombre, "apellidos": apellidos},
+            "user": {
+                "userId":    user_id,
+                "email":     email,
+                "nombre":    nombre,
+                "apellidos": apellidos,
+                "rol":       rol,
+            },
         })
 
     except Exception as e:
@@ -139,7 +149,7 @@ def register(event, context):
 def login(event, context):
     """POST /auth/login — Iniciar sesión."""
     try:
-        body = json.loads(event.get("body") or "{}")
+        body     = json.loads(event.get("body") or "{}")
         email    = (body.get("email") or "").strip().lower()
         password = body.get("password") or ""
 
@@ -159,10 +169,13 @@ def login(event, context):
         if not verify_password(password, user["password"]):
             return response(401, {"error": "Credenciales incorrectas"})
 
+        rol = user.get("rol", "comprador")
+
         token = create_jwt({
-            "userId":    user["userId"],
-            "email":     user["email"],
-            "nombre":    user["nombre"],
+            "userId": user["userId"],
+            "email":  user["email"],
+            "nombre": user["nombre"],
+            "rol":    rol,
         })
 
         return response(200, {
@@ -173,6 +186,7 @@ def login(event, context):
                 "email":     user["email"],
                 "nombre":    user["nombre"],
                 "apellidos": user.get("apellidos", ""),
+                "rol":       rol,
             },
         })
 
@@ -192,7 +206,7 @@ def me(event, context):
             return response(401, {"error": "Token inválido o expirado"})
 
         result = table.get_item(Key={"userId": payload["userId"]})
-        user = result.get("Item")
+        user   = result.get("Item")
         if not user:
             return response(404, {"error": "Usuario no encontrado"})
 
@@ -201,6 +215,7 @@ def me(event, context):
             "email":     user["email"],
             "nombre":    user["nombre"],
             "apellidos": user.get("apellidos", ""),
+            "rol":       user.get("rol", "comprador"),
             "createdAt": user.get("createdAt", ""),
         })
 

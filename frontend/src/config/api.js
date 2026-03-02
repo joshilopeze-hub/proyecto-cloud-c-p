@@ -66,6 +66,24 @@ export const eventosApi = {
     safeFetch(`${API.eventos}/events/${eventoId}`, {
       headers: getHeaders(false),
     }),
+
+  create: (data) =>
+    safeFetch(`${API.eventos}/events`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    }),
+
+  misEventos: () =>
+    safeFetch(`${API.eventos}/events/mis-eventos`, {
+      headers: getHeaders(),
+    }),
+
+  toggle: (eventoId) =>
+    safeFetch(`${API.eventos}/events/${eventoId}/toggle`, {
+      method: "PATCH",
+      headers: getHeaders(),
+    }),
 }
 
 // ── Tickets ───────────────────────────────────────────────────

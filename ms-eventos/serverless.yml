@@ -10,6 +10,7 @@ provider:
     role: arn:aws:iam::${aws:accountId}:role/LabRole
   environment:
     EVENTOS_TABLE: ${self:service}-eventos-${sls:stage}
+    JWT_SECRET: ${ssm:/boletealo/jwt_secret}
   httpApi:
     cors: true
 
@@ -30,10 +31,25 @@ functions:
 
   createEvento:
     handler: handler.create_evento
+    timeout: 15
     events:
       - httpApi:
           path: /events
           method: POST
+
+  listMisEventos:
+    handler: handler.list_mis_eventos
+    events:
+      - httpApi:
+          path: /events/mis-eventos
+          method: GET
+
+  toggleEvento:
+    handler: handler.toggle_evento
+    events:
+      - httpApi:
+          path: /events/{eventoId}/toggle
+          method: PATCH
 
 resources:
   Resources:

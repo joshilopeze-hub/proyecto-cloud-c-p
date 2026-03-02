@@ -9,10 +9,25 @@ import ComprarTicket from "./pages/ComprarTicket"
 import MisTickets from "./pages/MisTickets"
 import ReportarIncidente from "./pages/ReportarIncidente"
 import MisIncidentes from "./pages/MisIncidentes"
+import CrearEvento from "./pages/CrearEvento"
+import MisEventos from "./pages/MisEventos"
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("boletealo_token")
   return token ? children : <Navigate to="/login" replace />
+}
+
+function VendedorRoute({ children }) {
+  const token = localStorage.getItem("boletealo_token")
+  if (!token) return <Navigate to="/login" replace />
+  try {
+    const stored = localStorage.getItem("boletealo_user")
+    const user = stored ? JSON.parse(stored) : null
+    if (user?.rol !== "vendedor") return <Navigate to="/eventos" replace />
+  } catch {
+    return <Navigate to="/login" replace />
+  }
+  return children
 }
 
 export default function App() {
@@ -42,14 +57,22 @@ export default function App() {
     <BrowserRouter>
       <Navbar user={user} onLogout={handleLogout} />
       <Routes>
+        {/* Públicas */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/registro" element={<Registro onLogin={handleLogin} />} />
         <Route path="/eventos" element={<Eventos />} />
+
+        {/* Comprador */}
         <Route path="/comprar/:eventoId" element={<PrivateRoute><ComprarTicket /></PrivateRoute>} />
         <Route path="/mis-tickets" element={<PrivateRoute><MisTickets /></PrivateRoute>} />
         <Route path="/reportar/:ticketId" element={<PrivateRoute><ReportarIncidente /></PrivateRoute>} />
         <Route path="/mis-incidentes" element={<PrivateRoute><MisIncidentes /></PrivateRoute>} />
+
+        {/* Vendedor */}
+        <Route path="/crear-evento" element={<VendedorRoute><CrearEvento /></VendedorRoute>} />
+        <Route path="/mis-eventos" element={<VendedorRoute><MisEventos /></VendedorRoute>} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

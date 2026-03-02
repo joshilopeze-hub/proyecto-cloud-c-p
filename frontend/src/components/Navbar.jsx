@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom"
 
 export default function Navbar({ user, onLogout }) {
   const navigate = useNavigate()
+  const esVendedor = user?.rol === "vendedor"
 
   const handleLogout = () => {
     onLogout()
@@ -15,9 +16,20 @@ export default function Navbar({ user, onLogout }) {
         <Link to="/eventos" style={styles.link}>Eventos</Link>
         {user ? (
           <>
-            <Link to="/mis-tickets" style={styles.link}>Mis Tickets</Link>
-            <Link to="/mis-incidentes" style={styles.link}>Incidentes</Link>
-            <span style={styles.userInfo}>Hola, {user.nombre}</span>
+            {esVendedor ? (
+              <>
+                <Link to="/mis-eventos" style={styles.link}>Mis Eventos</Link>
+                <Link to="/crear-evento" style={styles.linkVendedor}>+ Crear Evento</Link>
+              </>
+            ) : (
+              <>
+                <Link to="/mis-tickets" style={styles.link}>Mis Tickets</Link>
+                <Link to="/mis-incidentes" style={styles.link}>Incidentes</Link>
+              </>
+            )}
+            <span style={{ ...styles.userInfo, color: esVendedor ? "#a78bfa" : "#aaa" }}>
+              {esVendedor ? "🏪" : "👤"} {user.nombre}
+            </span>
             <button onClick={handleLogout} style={styles.btnLogout}>Salir</button>
           </>
         ) : (
@@ -62,8 +74,16 @@ const styles = {
     fontSize: "0.95rem",
     transition: "color 0.2s",
   },
+  linkVendedor: {
+    color: "#a78bfa",
+    textDecoration: "none",
+    fontSize: "0.95rem",
+    fontWeight: "600",
+    border: "1px solid #7c3aed",
+    padding: "5px 12px",
+    borderRadius: "6px",
+  },
   userInfo: {
-    color: "#aaa",
     fontSize: "0.9rem",
   },
   btnLogout: {
