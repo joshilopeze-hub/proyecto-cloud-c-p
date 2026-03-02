@@ -1,6 +1,6 @@
 # 🎟️ Boletealo — Plataforma de Venta de Tickets Online
 
-Aplicación web serverless para la compra de tickets de eventos (conciertos, deportes, teatro, festivales) con pago integrado y gestión de incidentes.
+Aplicación web serverless para la compra y gestión de tickets de eventos (conciertos, deportes, teatro, festivales) con roles de comprador y vendedor, pago integrado y gestión de incidentes.
 
 **Desarrollado para:** Cloud Computing · Maestría en Ciencia de Datos · UTEC
 **Arquitectura:** 100% Serverless en AWS
@@ -11,33 +11,28 @@ Aplicación web serverless para la compra de tickets de eventos (conciertos, dep
 ## 🏗️ Arquitectura
 
 ```
-Usuario (Navegador)
-       │
-       ▼
-┌──────────────────────────────────────┐
-│  S3 Static Website (React 18 + Vite) │
-└──────────────────────────────────────┘
-       │ API calls (HTTPS)
-       ▼
-┌──────────────────────────────────────────────────────────────┐
-│                    API Gateway (HTTP API)                      │
-│  ┌─────────┐ ┌──────────┐ ┌──────────┐ ┌────────┐ ┌───────┐ │
-│  │ ms-auth │ │ms-eventos│ │ms-tickets│ │ms-pagos│ │ms-inc │ │
-│  └────┬────┘ └────┬─────┘ └────┬─────┘ └───┬────┘ └───┬───┘ │
-│       │           │            │            │           │      │
-│  ┌────▼────┐ ┌────▼─────┐ ┌───▼──────┐ ┌───▼────┐ ┌───▼───┐ │
-│  │ Lambda  │ │  Lambda  │ │  Lambda  │ │ Lambda │ │Lambda │ │
-│  └────┬────┘ └────┬─────┘ └────┬─────┘ └───┬────┘ └───┬───┘ │
-└───────┼───────────┼────────────┼────────────┼───────────┼─────┘
-        │           │            │            │           │
-   DynamoDB    DynamoDB     DynamoDB     DynamoDB    DynamoDB
-   (Users)     (Eventos)    (Tickets)    (Pagos)   (Incidentes)
-                                │                      │
-                         [decrementa]              S3 Bucket
-                         disponibles              (Evidencias)
-                                │
-                    SSM Parameter Store
-                    (JWT_SECRET, URLs)
+                        Usuario (Navegador)
+                               │
+                               ▼
+              ┌──────────────────────────────────────┐
+              │  S3 Static Website (React 18 + Vite) │
+              │   Comprador ──────── Vendedor         │
+              └──────────────────────────────────────┘
+                               │ API calls (HTTPS + JWT)
+           ┌───────────────────┼────────────────────────┐
+           ▼                   ▼                        ▼
+      ms-auth             ms-eventos              ms-tickets
+   API GW + Lambda       API GW + Lambda         API GW + Lambda
+   DynamoDB (Users)      DynamoDB (Eventos)      DynamoDB (Tickets)
+                                │                       │
+                          ms-pagos              ms-incidentes
+                         API GW + Lambda        API GW + Lambda
+                         DynamoDB (Pagos)       DynamoDB (Incidentes)
+                                                    S3 (Evidencias)
+
+              SSM Parameter Store (JWT_SECRET, URLs inter-servicios)
+              IAM Role LabRole (asumido por todas las Lambdas)
+              CloudFormation (gestiona los 5 stacks)
 ```
 
 Ver diagrama completo en: [`boletealo-architecture.drawio`](./boletealo-architecture.drawio)
@@ -55,6 +50,7 @@ Abrir en: [app.diagrams.net](https://app.diagrams.net) → File → Open
 | API | AWS API Gateway HTTP API (CORS habilitado) |
 | Base de datos | AWS DynamoDB (5 tablas, PAY_PER_REQUEST) |
 | Autenticación | JWT HS256 (implementación manual sin librerías externas) |
+| Autorización | Roles en JWT: `comprador` / `vendedor` |
 | Almacenamiento archivos | AWS S3 (evidencias de incidentes, Presigned URLs) |
 | Configuración/Secretos | AWS SSM Parameter Store |
 | Infraestructura como código | Serverless Framework v4 |
@@ -63,63 +59,82 @@ Abrir en: [app.diagrams.net](https://app.diagrams.net) → File → Open
 
 ---
 
+## 👥 Roles de usuario
+
+### 🎫 Comprador
+- Ver catálogo de eventos con filtros y disponibilidad en tiempo real
+- Comprar tickets (descuenta disponibles automáticamente)
+- Ver historial de tickets con código QR
+- Cancelar tickets activos (restaura disponibles)
+- Reportar incidentes con evidencia fotográfica
+
+### 🏪 Vendedor
+- Crear eventos con múltiples zonas y precios
+- Ver dashboard de sus propios eventos con stats
+- Activar / desactivar eventos publicados
+- Gestión completa del inventario de entradas por zona
+
+---
+
 ## 📦 Microservicios
 
-### ms-auth — Autenticación
+### ms-auth — Autenticación y Roles
 **URL base:** `https://v3mcdp3bea.execute-api.us-east-1.amazonaws.com`
 
-| Método | Endpoint | Auth | Descripción |
-|--------|----------|------|-------------|
-| POST | `/auth/register` | ❌ | Registrar usuario (nombre, apellidos, email, password) |
-| POST | `/auth/login` | ❌ | Iniciar sesión → devuelve JWT 24h |
-| GET | `/auth/me` | ✅ | Perfil del usuario autenticado |
+| Método | Endpoint | Auth | Rol | Descripción |
+|--------|----------|------|-----|-------------|
+| POST | `/auth/register` | ❌ | — | Registrar usuario. Body: `nombre, apellidos, email, password, rol` (`comprador`\|`vendedor`) |
+| POST | `/auth/login` | ❌ | — | Iniciar sesión → devuelve JWT 24h con campo `rol` |
+| GET | `/auth/me` | ✅ | — | Perfil del usuario autenticado |
 
 ---
 
 ### ms-eventos — Gestión de Eventos
 **URL base:** `https://kkuok1iccg.execute-api.us-east-1.amazonaws.com`
 
-| Método | Endpoint | Auth | Descripción |
-|--------|----------|------|-------------|
-| GET | `/events` | ❌ | Listar eventos (filtro: `?categoria=concierto`) |
-| GET | `/events/{eventoId}` | ❌ | Detalle + zonas disponibles |
-| POST | `/events` | ❌ | Crear evento |
+| Método | Endpoint | Auth | Rol | Descripción |
+|--------|----------|------|-----|-------------|
+| GET | `/events` | ❌ | — | Listar eventos activos (`?categoria=concierto&ciudad=Lima`) |
+| GET | `/events/{eventoId}` | ❌ | — | Detalle + zonas con disponibles |
+| POST | `/events` | ✅ | vendedor | Crear evento con zonas dinámicas |
+| GET | `/events/mis-eventos` | ✅ | vendedor | Eventos creados por el vendedor autenticado |
+| PATCH | `/events/{eventoId}/toggle` | ✅ | vendedor | Activar / desactivar evento (solo el dueño) |
 
-Categorías: `concierto` · `deporte` · `teatro` · `festival`
+Categorías válidas: `concierto` · `deporte` · `teatro` · `festival` · `conferencia` · `otro`
 
 ---
 
-### ms-tickets — Compra y Cancelación de Tickets
+### ms-tickets — Compra y Cancelación
 **URL base:** `https://s5fqc1t2j0.execute-api.us-east-1.amazonaws.com`
 
-| Método | Endpoint | Auth | Descripción |
-|--------|----------|------|-------------|
-| POST | `/tickets` | ✅ | Comprar tickets (descuenta disponibles en Eventos) |
-| GET | `/tickets` | ✅ | Mis tickets |
-| GET | `/tickets/{ticketId}` | ✅ | Detalle de ticket + QR |
-| DELETE | `/tickets/{ticketId}` | ✅ | Cancelar ticket (restaura disponibles) |
+| Método | Endpoint | Auth | Rol | Descripción |
+|--------|----------|------|-----|-------------|
+| POST | `/tickets` | ✅ | comprador | Comprar tickets (descuenta `disponibles` en Eventos) |
+| GET | `/tickets` | ✅ | comprador | Mis tickets |
+| GET | `/tickets/{ticketId}` | ✅ | comprador | Detalle de ticket + QR |
+| DELETE | `/tickets/{ticketId}` | ✅ | comprador | Cancelar ticket (restaura `disponibles`) |
 
 ---
 
 ### ms-pagos — Procesamiento de Pagos
 **URL base:** `https://qpbrdqcex3.execute-api.us-east-1.amazonaws.com`
 
-| Método | Endpoint | Auth | Descripción |
-|--------|----------|------|-------------|
-| POST | `/pagos/procesar` | ✅ | Procesar pago (Tarjeta o Yape, simulado) |
-| GET | `/pagos/{pagoId}` | ✅ | Detalle de pago |
+| Método | Endpoint | Auth | Rol | Descripción |
+|--------|----------|------|-----|-------------|
+| POST | `/pagos/procesar` | ✅ | comprador | Procesar pago (Tarjeta o Yape, simulado) |
+| GET | `/pagos/{pagoId}` | ✅ | comprador | Detalle de pago |
 
 ---
 
 ### ms-incidentes — Reportes de Incidentes
 **URL base:** `https://7a8ssnyqof.execute-api.us-east-1.amazonaws.com`
 
-| Método | Endpoint | Auth | Descripción |
-|--------|----------|------|-------------|
-| POST | `/incidentes` | ✅ | Crear incidente con referencia a ticket |
-| GET | `/incidentes` | ✅ | Mis incidentes |
-| GET | `/incidentes/{incidenteId}` | ✅ | Detalle de incidente |
-| POST | `/incidentes/upload-url` | ✅ | Presigned URL para subir evidencia a S3 |
+| Método | Endpoint | Auth | Rol | Descripción |
+|--------|----------|------|-----|-------------|
+| POST | `/incidentes` | ✅ | comprador | Crear incidente con referencia a ticket |
+| GET | `/incidentes` | ✅ | comprador | Mis incidentes |
+| GET | `/incidentes/{incidenteId}` | ✅ | comprador | Detalle de incidente |
+| POST | `/incidentes/upload-url` | ✅ | comprador | Presigned URL para subir evidencia a S3 |
 
 ---
 
@@ -131,27 +146,28 @@ boletealo/
 │   ├── index.html
 │   └── src/
 │       ├── config/api.js           # URLs de microservicios + safeFetch helper
-│       ├── App.jsx                 # Rutas + AuthContext
+│       ├── App.jsx                 # Rutas + PrivateRoute + VendedorRoute
 │       ├── pages/
 │       │   ├── Landing.jsx         # Hero + categorías + features
 │       │   ├── Login.jsx           # Formulario de login
-│       │   ├── Registro.jsx        # Formulario de registro
+│       │   ├── Registro.jsx        # Registro con selector de rol (Comprador/Vendedor)
 │       │   ├── Eventos.jsx         # Grid de eventos + filtros + contador disponibles
-│       │   ├── ComprarTicket.jsx   # Flujo 4 pasos: Evento→Zona→Pago→Confirmación
-│       │   ├── MisTickets.jsx      # Historial de tickets + botón cancelar
+│       │   ├── ComprarTicket.jsx   # Flujo 4 pasos: Evento→Zona→Pago→Confirmación QR
+│       │   ├── MisTickets.jsx      # Historial de tickets + cancelar
 │       │   ├── ReportarIncidente.jsx
-│       │   └── MisIncidentes.jsx
+│       │   ├── MisIncidentes.jsx
+│       │   ├── CrearEvento.jsx     # [vendedor] Formulario con zonas dinámicas
+│       │   └── MisEventos.jsx      # [vendedor] Dashboard con stats + toggle
 │       └── components/
-│           ├── Navbar.jsx
-│           └── Sidebar.jsx
+│           └── Navbar.jsx          # Nav condicional por rol
 ├── ms-auth/
-│   ├── handler.py
+│   ├── handler.py                  # register(rol), login, me
 │   └── serverless.yml
 ├── ms-eventos/
-│   ├── handler.py
+│   ├── handler.py                  # list, get, create(vendedor), mis-eventos, toggle
 │   └── serverless.yml
 ├── ms-tickets/
-│   ├── handler.py
+│   ├── handler.py                  # buy, list, get, cancel + decrementar/incrementar
 │   └── serverless.yml
 ├── ms-pagos/
 │   ├── handler.py
@@ -169,8 +185,8 @@ boletealo/
 
 ### 1. Requisitos en EC2
 ```bash
-node --version   # 18+
-python3 --version  # 3.10
+node --version    # 18+
+python3 --version # 3.10
 npm install -g serverless
 ```
 
@@ -180,7 +196,7 @@ git clone https://github.com/joshilopeze-hub/proyecto-cloud-c-p.git boletealo
 cd boletealo
 ```
 
-### 3. Crear parámetros SSM
+### 3. Crear parámetros SSM (solo la primera vez)
 ```bash
 aws ssm put-parameter --name /boletealo/jwt_secret \
   --value "mi-secreto-seguro-aqui" --type SecureString
@@ -188,14 +204,13 @@ aws ssm put-parameter --name /boletealo/jwt_secret \
 # Ejecutar DESPUÉS de desplegar ms-eventos y ms-tickets:
 aws ssm put-parameter --name /boletealo/ms_eventos_url --value "https://URL_EVENTOS" --type String
 aws ssm put-parameter --name /boletealo/ms_tickets_url --value "https://URL_TICKETS" --type String
-aws ssm put-parameter --name /boletealo/ms_pagos_url   --value "https://URL_PAGOS"   --type String
 ```
 
-### 4. Desplegar microservicios
+### 4. Desplegar microservicios (en orden)
 ```bash
 for ms in ms-auth ms-eventos ms-tickets ms-pagos ms-incidentes; do
   cd $ms
-  npm install serverless-python-requirements
+  npm install
   serverless deploy
   cd ..
 done
@@ -223,18 +238,18 @@ nano ~/.aws/credentials
 # 2. Verificar
 aws sts get-caller-identity
 
-# 3. Re-desplegar solo lo que cambió
-cd ~/boletealo && git pull origin main
+# 3. Pull y re-desplegar solo lo que cambió
+cd ~/proyecto-cloud-c-p && git pull origin main
 
-# Si cambió ms-tickets:
-cd ms-tickets && serverless deploy && cd ..
+# Redesplegar un microservicio:
+cd ms-eventos && serverless deploy && cd ..
 
 # Siempre al cambiar frontend:
-cd frontend && rm -rf dist/ && npm run build && \
+cd frontend && npm run build && \
   aws s3 sync dist/ s3://boletealo-frontend-dev/ --delete
 ```
 
-> **Nota:** La URL del sitio web en S3 no cambia entre sesiones. Solo las credenciales del CLI expiran.
+> **Nota:** La URL del sitio S3 no cambia entre sesiones. Solo las credenciales del CLI expiran.
 
 ---
 
@@ -242,17 +257,18 @@ cd frontend && rm -rf dist/ && npm run build && \
 
 - Passwords hasheados con SHA-256 + salt aleatorio de 16 bytes
 - JWT HS256 con expiración de 24h, almacenado en `localStorage`
+- JWT incluye campo `rol` — todos los microservicios verifican el rol sin llamar a ms-auth
+- Rutas protegidas con `<PrivateRoute>` (requiere token) y `<VendedorRoute>` (requiere rol vendedor)
 - CORS `*` habilitado en todos los endpoints (API Gateway + Lambda)
-- Rutas privadas protegidas con `<PrivateRoute>` en el frontend
-- Secretos gestionados en SSM Parameter Store (no hardcodeados en código)
+- Secreto JWT gestionado en SSM Parameter Store (no hardcodeado)
 - Presigned URLs para subida directa de archivos a S3 (sin pasar por Lambda)
 
 ---
 
 ## 💳 Métodos de pago
 
-| Método | Campos |
-|--------|--------|
+| Método | Campos requeridos |
+|--------|------------------|
 | Tarjeta | Número 16 dígitos, CVV, nombre titular |
 | Yape | Número de celular (9 dígitos), código de seguridad (6 dígitos) |
 
@@ -262,14 +278,29 @@ cd frontend && rm -rf dist/ && npm run build && \
 
 ## ✅ Funcionalidades implementadas
 
-- [x] Registro e inicio de sesión con JWT
-- [x] Listado de eventos con filtro por categoría
-- [x] Contador de entradas disponibles por zona (actualizado en tiempo real)
-- [x] Color de alerta cuando quedan menos de 50 entradas
+**Autenticación y roles:**
+- [x] Registro con selector visual de rol (Comprador / Vendedor)
+- [x] Login con JWT que incluye rol
+- [x] Navbar condicional según rol
+- [x] Rutas protegidas por rol (`VendedorRoute`)
+
+**Flujo comprador:**
+- [x] Listado de eventos con filtro por categoría y ciudad
+- [x] Contador de entradas disponibles por zona (verde ≥50 / ámbar <50 / rojo agotado)
 - [x] Flujo de compra en 4 pasos: Evento → Zona → Pago → Confirmación QR
 - [x] Descuento automático de disponibles al comprar
 - [x] Cancelación de tickets (restaura disponibles automáticamente)
 - [x] Reporte de incidentes con adjunto de evidencia (upload a S3)
-- [x] Historial de tickets e incidentes por usuario
+- [x] Historial de tickets e incidentes
+
+**Flujo vendedor:**
+- [x] Crear eventos con nombre, categoría, fecha, hora, lugar, ciudad, descripción
+- [x] Zonas dinámicas: agregar/eliminar zonas con nombre, precio y disponibles
+- [x] Preview de precio mínimo y total de entradas antes de publicar
+- [x] Dashboard de eventos propios con stats (precio desde, disponibles, estado)
+- [x] Activar / desactivar eventos publicados con un clic
+
+**UX general:**
 - [x] Fechas formateadas (`15 Mar 2026` en vez de `2026-03-15`)
 - [x] Banners por categoría con colores diferenciados
+- [x] Diseño dark mode consistente en toda la app

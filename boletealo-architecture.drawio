@@ -4,77 +4,86 @@
     <mxCell id="1" parent="0" />
 
     <!-- ===================== TITLE ===================== -->
-    <mxCell id="title" value="Boletealo – AWS Serverless Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;fontColor=#1a1a2e;" vertex="1" parent="1">
-      <mxGeometry x="400" y="20" width="800" height="40" as="geometry" />
+    <mxCell id="title" value="Boletealo – AWS Serverless Architecture (with Buyer/Seller Roles)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;fontColor=#1a1a2e;" vertex="1" parent="1">
+      <mxGeometry x="300" y="20" width="1000" height="40" as="geometry" />
     </mxCell>
 
     <!-- ===================== BACKGROUND SECTIONS ===================== -->
     <!-- Deployment Layer background -->
     <mxCell id="bg_deploy" value="Deployment Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=13;fontStyle=1;verticalAlign=top;opacity=50;" vertex="1" parent="1">
-      <mxGeometry x="30" y="940" width="1590" height="170" as="geometry" />
+      <mxGeometry x="30" y="1000" width="1590" height="150" as="geometry" />
     </mxCell>
 
     <!-- Application Layer background -->
     <mxCell id="bg_app" value="Application Layer (Microservices)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;verticalAlign=top;opacity=30;" vertex="1" parent="1">
-      <mxGeometry x="280" y="200" width="1340" height="680" as="geometry" />
+      <mxGeometry x="280" y="200" width="1340" height="760" as="geometry" />
     </mxCell>
 
-    <!-- ===================== USER ===================== -->
-    <mxCell id="user" value="User&#xa;(Browser)" style="shape=mxgraph.aws4.user;fillColor=#1a1a2e;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=12;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="60" y="340" width="60" height="70" as="geometry" />
+    <!-- ===================== USERS (Buyer + Seller) ===================== -->
+    <!-- Buyer -->
+    <mxCell id="buyer" value="🎫 Comprador&#xa;(Browser)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e94560;strokeColor=#c0392b;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="320" width="110" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- Seller -->
+    <mxCell id="seller" value="🏪 Vendedor&#xa;(Browser)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;strokeColor=#5b21b6;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="420" width="110" height="50" as="geometry" />
     </mxCell>
 
     <!-- ===================== S3 STATIC WEBSITE ===================== -->
-    <mxCell id="s3_web" value="S3 Static Website&#xa;React 18 + Vite&#xa;(boletealo-frontend)" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;fillColor=#dd344c;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="540" y="80" width="60" height="60" as="geometry" />
+    <mxCell id="s3_web" value="S3 Static Website&#xa;React 18 + Vite&#xa;boletealo-frontend-dev" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;fillColor=#dd344c;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="540" y="75" width="60" height="60" as="geometry" />
     </mxCell>
 
-    <!-- User → S3 Website -->
-    <mxCell id="e_user_s3" value="HTTP request&#xa;(browser)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#dd344c;strokeWidth=2;fontColor=#dd344c;fontSize=9;" edge="1" source="user" target="s3_web" parent="1">
+    <!-- Buyer → S3 -->
+    <mxCell id="e_buyer_s3" value="HTTP" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#e94560;strokeWidth=2;fontSize=9;" edge="1" source="buyer" target="s3_web" parent="1">
       <mxGeometry relative="1" as="geometry">
         <Array as="points">
-          <mxPoint x="180" y="375" />
-          <mxPoint x="180" y="110" />
+          <mxPoint x="175" y="345" />
+          <mxPoint x="175" y="105" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Seller → S3 -->
+    <mxCell id="e_seller_s3" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7c3aed;strokeWidth=2;fontSize=9;" edge="1" source="seller" target="s3_web" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="185" y="445" />
+          <mxPoint x="185" y="105" />
         </Array>
       </mxGeometry>
     </mxCell>
 
     <!-- ===================== IAM ROLE ===================== -->
     <mxCell id="iam" value="IAM Role&#xa;LabRole" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.role;fillColor=#DD344C;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="130" y="540" width="60" height="60" as="geometry" />
+      <mxGeometry x="120" y="580" width="60" height="60" as="geometry" />
     </mxCell>
-
-    <!-- IAM label note -->
     <mxCell id="iam_note" value="(Assumed by all Lambdas)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=9;fontColor=#666666;" vertex="1" parent="1">
-      <mxGeometry x="95" y="608" width="130" height="20" as="geometry" />
+      <mxGeometry x="85" y="648" width="130" height="20" as="geometry" />
     </mxCell>
 
     <!-- ===================== SSM PARAMETER STORE ===================== -->
-    <mxCell id="ssm" value="SSM Parameter Store&#xa;• JWT_SECRET&#xa;• ms_eventos_url&#xa;• ms_tickets_url&#xa;• ms_pagos_url" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.systems_manager_parameter_store;fillColor=#8c4fff;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="130" y="700" width="60" height="60" as="geometry" />
+    <mxCell id="ssm" value="SSM Parameter Store&#xa;• /boletealo/jwt_secret&#xa;• /boletealo/ms_eventos_url&#xa;• /boletealo/ms_tickets_url" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.systems_manager_parameter_store;fillColor=#8c4fff;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="120" y="740" width="60" height="60" as="geometry" />
     </mxCell>
 
     <!-- ==================== CLOUDFORMATION ==================== -->
-    <mxCell id="cfn" value="CloudFormation&#xa;(manages all stacks)" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudformation;fillColor=#E7157B;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="130" y="840" width="60" height="60" as="geometry" />
+    <mxCell id="cfn" value="CloudFormation&#xa;(5 stacks)" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudformation;fillColor=#E7157B;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="120" y="880" width="60" height="60" as="geometry" />
     </mxCell>
 
     <!-- =====================================================================
          MICROSERVICE 1 – ms-auth
          ===================================================================== -->
-    <!-- API GW auth -->
     <mxCell id="apigw_auth" value="API Gateway&#xa;(HTTP API)&#xa;ms-auth" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.api_gateway;fillColor=#4D72AA;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
       <mxGeometry x="370" y="230" width="60" height="60" as="geometry" />
     </mxCell>
-    <!-- Lambda auth -->
-    <mxCell id="lambda_auth" value="Lambda (Python 3.10)&#xa;ms-auth&#xa;POST /auth/register&#xa;POST /auth/login&#xa;GET  /auth/me" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;fillColor=#E07515;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+    <mxCell id="lambda_auth" value="Lambda (Python 3.10)&#xa;ms-auth&#xa;POST /auth/register (+ rol)&#xa;POST /auth/login (JWT+rol)&#xa;GET  /auth/me" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;fillColor=#E07515;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
       <mxGeometry x="560" y="230" width="60" height="60" as="geometry" />
     </mxCell>
-    <!-- DynamoDB Users -->
-    <mxCell id="ddb_users" value="DynamoDB&#xa;Users" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;fillColor=#2E7D32;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+    <mxCell id="ddb_users" value="DynamoDB&#xa;Users&#xa;(+rol field)" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;fillColor=#2E7D32;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
       <mxGeometry x="1490" y="230" width="60" height="60" as="geometry" />
     </mxCell>
-    <!-- edges auth -->
     <mxCell id="e_apigw_lambda_auth" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4D72AA;strokeWidth=2;" edge="1" source="apigw_auth" target="lambda_auth" parent="1">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
@@ -82,17 +91,22 @@
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
 
+    <!-- JWT Role badge -->
+    <mxCell id="jwt_badge" value="JWT payload: { userId, email, nombre, rol }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e1040;strokeColor=#7c3aed;fontColor=#a78bfa;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="680" y="215" width="240" height="24" as="geometry" />
+    </mxCell>
+
     <!-- =====================================================================
          MICROSERVICE 2 – ms-eventos
          ===================================================================== -->
     <mxCell id="apigw_eventos" value="API Gateway&#xa;(HTTP API)&#xa;ms-eventos" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.api_gateway;fillColor=#4D72AA;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="370" y="380" width="60" height="60" as="geometry" />
+      <mxGeometry x="370" y="390" width="60" height="60" as="geometry" />
     </mxCell>
-    <mxCell id="lambda_eventos" value="Lambda (Python 3.10)&#xa;ms-eventos&#xa;GET  /events&#xa;GET  /events/{id}&#xa;POST /events" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;fillColor=#E07515;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="560" y="380" width="60" height="60" as="geometry" />
+    <mxCell id="lambda_eventos" value="Lambda (Python 3.10)&#xa;ms-eventos&#xa;GET  /events (público)&#xa;GET  /events/{id} (público)&#xa;POST /events (🏪 vendedor)&#xa;GET  /events/mis-eventos (🏪)&#xa;PATCH /events/{id}/toggle (🏪)" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;fillColor=#E07515;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="560" y="390" width="60" height="60" as="geometry" />
     </mxCell>
-    <mxCell id="ddb_eventos" value="DynamoDB&#xa;Eventos" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;fillColor=#2E7D32;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="1490" y="380" width="60" height="60" as="geometry" />
+    <mxCell id="ddb_eventos" value="DynamoDB&#xa;Eventos&#xa;(vendedorId, activo,&#xa;zonas, precioDesde)" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;fillColor=#2E7D32;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="1490" y="390" width="60" height="60" as="geometry" />
     </mxCell>
     <mxCell id="e_apigw_lambda_eventos" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4D72AA;strokeWidth=2;" edge="1" source="apigw_eventos" target="lambda_eventos" parent="1">
       <mxGeometry relative="1" as="geometry" />
@@ -101,17 +115,22 @@
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
 
+    <!-- Vendor-only badge -->
+    <mxCell id="vendor_badge" value="🏪 POST/mis-eventos/toggle → rol=vendedor required" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e1040;strokeColor=#7c3aed;fontColor=#a78bfa;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="680" y="375" width="290" height="24" as="geometry" />
+    </mxCell>
+
     <!-- =====================================================================
          MICROSERVICE 3 – ms-tickets
          ===================================================================== -->
     <mxCell id="apigw_tickets" value="API Gateway&#xa;(HTTP API)&#xa;ms-tickets" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.api_gateway;fillColor=#4D72AA;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="370" y="530" width="60" height="60" as="geometry" />
+      <mxGeometry x="370" y="570" width="60" height="60" as="geometry" />
     </mxCell>
-    <mxCell id="lambda_tickets" value="Lambda (Python 3.10)&#xa;ms-tickets&#xa;POST   /tickets&#xa;GET    /tickets&#xa;GET    /tickets/{id}&#xa;DELETE /tickets/{id}" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;fillColor=#E07515;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="560" y="530" width="60" height="60" as="geometry" />
+    <mxCell id="lambda_tickets" value="Lambda (Python 3.10)&#xa;ms-tickets&#xa;POST   /tickets (buy)&#xa;GET    /tickets (mis tickets)&#xa;GET    /tickets/{id}&#xa;DELETE /tickets/{id} (cancel)" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;fillColor=#E07515;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="560" y="570" width="60" height="60" as="geometry" />
     </mxCell>
-    <mxCell id="ddb_tickets" value="DynamoDB&#xa;Tickets" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;fillColor=#2E7D32;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="1490" y="530" width="60" height="60" as="geometry" />
+    <mxCell id="ddb_tickets" value="DynamoDB&#xa;Tickets&#xa;(GSI: userId-index)" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;fillColor=#2E7D32;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="1490" y="570" width="60" height="60" as="geometry" />
     </mxCell>
     <mxCell id="e_apigw_lambda_tickets" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4D72AA;strokeWidth=2;" edge="1" source="apigw_tickets" target="lambda_tickets" parent="1">
       <mxGeometry relative="1" as="geometry" />
@@ -119,12 +138,12 @@
     <mxCell id="e_lambda_tickets_ddb" value="read/write" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#2E7D32;strokeWidth=2;fontSize=9;" edge="1" source="lambda_tickets" target="ddb_tickets" parent="1">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-    <!-- ms-tickets also reads/writes Eventos table (decrement seats) -->
-    <mxCell id="e_tickets_eventos_ddb" value="decrement seats" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#FF6600;strokeWidth=1.5;dashed=1;fontSize=9;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=1;entryDx=0;entryDy=0;" edge="1" source="lambda_tickets" target="ddb_eventos" parent="1">
+    <!-- ms-tickets decrements/restores disponibles in Eventos table -->
+    <mxCell id="e_tickets_eventos_ddb" value="decrement / restore disponibles" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#FF6600;strokeWidth=1.5;dashed=1;fontSize=9;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=1;entryDx=0;entryDy=0;" edge="1" source="lambda_tickets" target="ddb_eventos" parent="1">
       <mxGeometry relative="1" as="geometry">
         <Array as="points">
-          <mxPoint x="1460" y="530" />
-          <mxPoint x="1460" y="465" />
+          <mxPoint x="1460" y="570" />
+          <mxPoint x="1460" y="475" />
         </Array>
       </mxGeometry>
     </mxCell>
@@ -133,13 +152,13 @@
          MICROSERVICE 4 – ms-pagos
          ===================================================================== -->
     <mxCell id="apigw_pagos" value="API Gateway&#xa;(HTTP API)&#xa;ms-pagos" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.api_gateway;fillColor=#4D72AA;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="370" y="680" width="60" height="60" as="geometry" />
+      <mxGeometry x="370" y="730" width="60" height="60" as="geometry" />
     </mxCell>
     <mxCell id="lambda_pagos" value="Lambda (Python 3.10)&#xa;ms-pagos&#xa;POST /pagos/procesar&#xa;GET  /pagos/{id}" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;fillColor=#E07515;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="560" y="680" width="60" height="60" as="geometry" />
+      <mxGeometry x="560" y="730" width="60" height="60" as="geometry" />
     </mxCell>
     <mxCell id="ddb_pagos" value="DynamoDB&#xa;Pagos" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;fillColor=#2E7D32;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="1490" y="680" width="60" height="60" as="geometry" />
+      <mxGeometry x="1490" y="730" width="60" height="60" as="geometry" />
     </mxCell>
     <mxCell id="e_apigw_lambda_pagos" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4D72AA;strokeWidth=2;" edge="1" source="apigw_pagos" target="lambda_pagos" parent="1">
       <mxGeometry relative="1" as="geometry" />
@@ -147,33 +166,21 @@
     <mxCell id="e_lambda_pagos_ddb" value="read/write" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#2E7D32;strokeWidth=2;fontSize=9;" edge="1" source="lambda_pagos" target="ddb_pagos" parent="1">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-    <!-- ms-pagos calls ms-tickets internally -->
-    <mxCell id="e_pagos_tickets" value="calls internally" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#FF6600;strokeWidth=1.5;dashed=1;fontSize=9;" edge="1" source="lambda_pagos" target="lambda_tickets" parent="1">
-      <mxGeometry relative="1" as="geometry">
-        <Array as="points">
-          <mxPoint x="660" y="730" />
-          <mxPoint x="680" y="730" />
-          <mxPoint x="680" y="560" />
-          <mxPoint x="660" y="560" />
-        </Array>
-      </mxGeometry>
-    </mxCell>
 
     <!-- =====================================================================
          MICROSERVICE 5 – ms-incidentes
          ===================================================================== -->
     <mxCell id="apigw_incidentes" value="API Gateway&#xa;(HTTP API)&#xa;ms-incidentes" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.api_gateway;fillColor=#4D72AA;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="370" y="820" width="60" height="60" as="geometry" />
+      <mxGeometry x="370" y="880" width="60" height="60" as="geometry" />
     </mxCell>
     <mxCell id="lambda_incidentes" value="Lambda (Python 3.10)&#xa;ms-incidentes&#xa;POST /incidentes&#xa;GET  /incidentes&#xa;GET  /incidentes/{id}&#xa;POST /incidentes/upload-url" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;fillColor=#E07515;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="560" y="820" width="60" height="60" as="geometry" />
+      <mxGeometry x="560" y="880" width="60" height="60" as="geometry" />
     </mxCell>
     <mxCell id="ddb_incidentes" value="DynamoDB&#xa;Incidentes" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;fillColor=#2E7D32;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="1490" y="820" width="60" height="60" as="geometry" />
+      <mxGeometry x="1490" y="880" width="60" height="60" as="geometry" />
     </mxCell>
-    <!-- S3 Evidencias -->
-    <mxCell id="s3_evidencias" value="S3 Bucket&#xa;evidencias" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;fillColor=#dd344c;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="1350" y="820" width="60" height="60" as="geometry" />
+    <mxCell id="s3_evidencias" value="S3 Bucket&#xa;evidencias&#xa;(Presigned URL)" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;fillColor=#dd344c;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="1350" y="880" width="60" height="60" as="geometry" />
     </mxCell>
     <mxCell id="e_apigw_lambda_incidentes" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4D72AA;strokeWidth=2;" edge="1" source="apigw_incidentes" target="lambda_incidentes" parent="1">
       <mxGeometry relative="1" as="geometry" />
@@ -186,21 +193,31 @@
     </mxCell>
 
     <!-- =====================================================================
-         USER → API GATEWAYS  (browser calls each microservice)
+         BUYER flows (red arrows)
          ===================================================================== -->
-    <mxCell id="e_user_apigw_auth" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4D72AA;strokeWidth=1.5;" edge="1" source="user" target="apigw_auth" parent="1">
+    <mxCell id="e_buyer_auth" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#e94560;strokeWidth=1.5;" edge="1" source="buyer" target="apigw_auth" parent="1">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-    <mxCell id="e_user_apigw_eventos" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4D72AA;strokeWidth=1.5;" edge="1" source="user" target="apigw_eventos" parent="1">
+    <mxCell id="e_buyer_eventos" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#e94560;strokeWidth=1.5;" edge="1" source="buyer" target="apigw_eventos" parent="1">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-    <mxCell id="e_user_apigw_tickets" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4D72AA;strokeWidth=1.5;" edge="1" source="user" target="apigw_tickets" parent="1">
+    <mxCell id="e_buyer_tickets" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#e94560;strokeWidth=1.5;" edge="1" source="buyer" target="apigw_tickets" parent="1">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-    <mxCell id="e_user_apigw_pagos" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4D72AA;strokeWidth=1.5;" edge="1" source="user" target="apigw_pagos" parent="1">
+    <mxCell id="e_buyer_pagos" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#e94560;strokeWidth=1.5;" edge="1" source="buyer" target="apigw_pagos" parent="1">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-    <mxCell id="e_user_apigw_incidentes" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4D72AA;strokeWidth=1.5;" edge="1" source="user" target="apigw_incidentes" parent="1">
+    <mxCell id="e_buyer_incidentes" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#e94560;strokeWidth=1.5;" edge="1" source="buyer" target="apigw_incidentes" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- =====================================================================
+         SELLER flows (purple arrows — only auth + eventos)
+         ===================================================================== -->
+    <mxCell id="e_seller_auth" value="" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7c3aed;strokeWidth=1.5;" edge="1" source="seller" target="apigw_auth" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_seller_eventos" value="create/mis-eventos/toggle" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7c3aed;strokeWidth=2;fontSize=9;fontStyle=1;" edge="1" source="seller" target="apigw_eventos" parent="1">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
 
@@ -223,7 +240,7 @@
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
 
-    <!-- IAM → Lambdas (single representative arrow with label) -->
+    <!-- IAM → Lambda (representative) -->
     <mxCell id="e_iam_lambdas" value="assumes role" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#DD344C;strokeWidth=1.5;dashed=1;fontSize=9;" edge="1" source="iam" target="lambda_auth" parent="1">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
@@ -231,128 +248,128 @@
     <!-- =====================================================================
          DEPLOYMENT LAYER
          ===================================================================== -->
-    <!-- GitHub -->
-    <mxCell id="github" value="GitHub Repository&#xa;(source code)" style="shape=mxgraph.veeam2.github;fillColor=#1a1a2e;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="500" y="980" width="60" height="60" as="geometry" />
+    <mxCell id="github" value="GitHub Repository&#xa;proyecto-cloud-c-p" style="shape=mxgraph.veeam2.github;fillColor=#1a1a2e;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="500" y="1030" width="60" height="60" as="geometry" />
     </mxCell>
-
-    <!-- EC2 t2.micro -->
-    <mxCell id="ec2" value="EC2 t2.micro&#xa;(deployment terminal)&#xa;git pull + serverless deploy" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ec2;fillColor=#ED7100;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="700" y="980" width="60" height="60" as="geometry" />
+    <mxCell id="ec2" value="EC2 t2.micro&#xa;git pull + serverless deploy&#xa;+ npm run build + s3 sync" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ec2;fillColor=#ED7100;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="700" y="1030" width="60" height="60" as="geometry" />
     </mxCell>
-
-    <!-- Serverless Framework -->
     <mxCell id="sls" value="Serverless Framework v4&#xa;(IaC / deploy tool)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#333333;fontColor=#1a1a2e;fontSize=11;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="900" y="980" width="180" height="60" as="geometry" />
+      <mxGeometry x="900" y="1030" width="180" height="60" as="geometry" />
     </mxCell>
-
-    <!-- CloudFormation stacks -->
     <mxCell id="cfn2" value="CloudFormation&#xa;(5 stacks deployed)" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudformation;fillColor=#E7157B;strokeColor=#ffffff;fontColor=#1a1a2e;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;fontSize=11;fontStyle=1;" vertex="1" parent="1">
-      <mxGeometry x="1140" y="980" width="60" height="60" as="geometry" />
+      <mxGeometry x="1140" y="1030" width="60" height="60" as="geometry" />
     </mxCell>
 
-    <!-- GitHub → EC2 -->
     <mxCell id="e_gh_ec2" value="git pull" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#333333;strokeWidth=2;fontSize=9;" edge="1" source="github" target="ec2" parent="1">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- EC2 → Serverless -->
     <mxCell id="e_ec2_sls" value="runs" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#333333;strokeWidth=2;fontSize=9;" edge="1" source="ec2" target="sls" parent="1">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- Serverless → CloudFormation -->
     <mxCell id="e_sls_cfn" value="generates" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#E7157B;strokeWidth=2;fontSize=9;" edge="1" source="sls" target="cfn2" parent="1">
       <mxGeometry relative="1" as="geometry" />
     </mxCell>
-
-    <!-- CloudFormation → deploys all services (representative arrow) -->
     <mxCell id="e_cfn_apigw" value="deploys" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#E7157B;strokeWidth=1.5;dashed=1;fontSize=9;" edge="1" source="cfn2" target="apigw_auth" parent="1">
       <mxGeometry relative="1" as="geometry">
         <Array as="points">
-          <mxPoint x="1170" y="930" />
-          <mxPoint x="400" y="930" />
+          <mxPoint x="1170" y="990" />
+          <mxPoint x="400" y="990" />
           <mxPoint x="400" y="290" />
         </Array>
       </mxGeometry>
     </mxCell>
 
     <!-- =====================================================================
-         LEGEND
-         ===================================================================== -->
-    <mxCell id="legend_bg" value="Legend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
-      <mxGeometry x="1270" y="100" width="350" height="220" as="geometry" />
-    </mxCell>
-
-    <mxCell id="leg1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4D72AA;strokeColor=#333333;" vertex="1" parent="1">
-      <mxGeometry x="1285" y="130" width="24" height="16" as="geometry" />
-    </mxCell>
-    <mxCell id="leg1t" value="API Gateway (HTTP API)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
-      <mxGeometry x="1317" y="128" width="180" height="20" as="geometry" />
-    </mxCell>
-
-    <mxCell id="leg2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E07515;strokeColor=#333333;" vertex="1" parent="1">
-      <mxGeometry x="1285" y="158" width="24" height="16" as="geometry" />
-    </mxCell>
-    <mxCell id="leg2t" value="Lambda (Python 3.10)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
-      <mxGeometry x="1317" y="156" width="180" height="20" as="geometry" />
-    </mxCell>
-
-    <mxCell id="leg3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E7D32;strokeColor=#333333;" vertex="1" parent="1">
-      <mxGeometry x="1285" y="186" width="24" height="16" as="geometry" />
-    </mxCell>
-    <mxCell id="leg3t" value="DynamoDB Table" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
-      <mxGeometry x="1317" y="184" width="180" height="20" as="geometry" />
-    </mxCell>
-
-    <mxCell id="leg4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dd344c;strokeColor=#333333;" vertex="1" parent="1">
-      <mxGeometry x="1285" y="214" width="24" height="16" as="geometry" />
-    </mxCell>
-    <mxCell id="leg4t" value="S3 Bucket / Static Website" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
-      <mxGeometry x="1317" y="212" width="180" height="20" as="geometry" />
-    </mxCell>
-
-    <mxCell id="leg5" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8c4fff;strokeColor=#333333;" vertex="1" parent="1">
-      <mxGeometry x="1285" y="242" width="24" height="16" as="geometry" />
-    </mxCell>
-    <mxCell id="leg5t" value="SSM Parameter Store" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
-      <mxGeometry x="1317" y="240" width="180" height="20" as="geometry" />
-    </mxCell>
-
-    <mxCell id="leg6" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E7157B;strokeColor=#333333;" vertex="1" parent="1">
-      <mxGeometry x="1285" y="270" width="24" height="16" as="geometry" />
-    </mxCell>
-    <mxCell id="leg6t" value="CloudFormation / IAM" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
-      <mxGeometry x="1317" y="268" width="180" height="20" as="geometry" />
-    </mxCell>
-
-    <mxCell id="leg7_line" value="" style="endArrow=open;endFill=0;dashed=1;strokeColor=#FF6600;strokeWidth=1.5;" edge="1" parent="1">
-      <mxGeometry x="1285" y="303" width="24" height="16" as="geometry">
-        <mxPoint x="1285" y="298" as="sourcePoint" />
-        <mxPoint x="1309" y="298" as="targetPoint" />
-      </mxGeometry>
-    </mxCell>
-    <mxCell id="leg7t" value="Internal service call / cross-table access" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
-      <mxGeometry x="1317" y="288" width="240" height="20" as="geometry" />
-    </mxCell>
-
-    <!-- =====================================================================
-         MICROSERVICE ROW LABELS (left margin)
+         MICROSERVICE ROW LABELS
          ===================================================================== -->
     <mxCell id="label_auth" value="ms-auth" style="text;html=1;strokeColor=none;fillColor=#4D72AA;fontColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;rounded=1;" vertex="1" parent="1">
       <mxGeometry x="295" y="248" width="65" height="24" as="geometry" />
     </mxCell>
     <mxCell id="label_eventos" value="ms-eventos" style="text;html=1;strokeColor=none;fillColor=#4D72AA;fontColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;rounded=1;" vertex="1" parent="1">
-      <mxGeometry x="290" y="398" width="70" height="24" as="geometry" />
+      <mxGeometry x="290" y="408" width="70" height="24" as="geometry" />
     </mxCell>
     <mxCell id="label_tickets" value="ms-tickets" style="text;html=1;strokeColor=none;fillColor=#4D72AA;fontColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;rounded=1;" vertex="1" parent="1">
-      <mxGeometry x="295" y="548" width="65" height="24" as="geometry" />
+      <mxGeometry x="295" y="588" width="65" height="24" as="geometry" />
     </mxCell>
     <mxCell id="label_pagos" value="ms-pagos" style="text;html=1;strokeColor=none;fillColor=#4D72AA;fontColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;rounded=1;" vertex="1" parent="1">
-      <mxGeometry x="295" y="698" width="65" height="24" as="geometry" />
+      <mxGeometry x="295" y="748" width="65" height="24" as="geometry" />
     </mxCell>
     <mxCell id="label_incidentes" value="ms-incidentes" style="text;html=1;strokeColor=none;fillColor=#4D72AA;fontColor=#ffffff;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;rounded=1;" vertex="1" parent="1">
-      <mxGeometry x="286" y="838" width="78" height="24" as="geometry" />
+      <mxGeometry x="286" y="898" width="78" height="24" as="geometry" />
+    </mxCell>
+
+    <!-- =====================================================================
+         LEGEND
+         ===================================================================== -->
+    <mxCell id="legend_bg" value="Legend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontSize=12;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="1270" y="100" width="350" height="280" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leg1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4D72AA;" vertex="1" parent="1">
+      <mxGeometry x="1285" y="130" width="24" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="leg1t" value="API Gateway (HTTP API)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1317" y="128" width="190" height="20" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leg2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E07515;" vertex="1" parent="1">
+      <mxGeometry x="1285" y="156" width="24" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="leg2t" value="Lambda (Python 3.10)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1317" y="154" width="190" height="20" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leg3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E7D32;" vertex="1" parent="1">
+      <mxGeometry x="1285" y="182" width="24" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="leg3t" value="DynamoDB Table" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1317" y="180" width="190" height="20" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leg4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dd344c;" vertex="1" parent="1">
+      <mxGeometry x="1285" y="208" width="24" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="leg4t" value="S3 Bucket / Static Website" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1317" y="206" width="190" height="20" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leg5" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8c4fff;" vertex="1" parent="1">
+      <mxGeometry x="1285" y="234" width="24" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="leg5t" value="SSM Parameter Store" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1317" y="232" width="190" height="20" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leg6" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e94560;" vertex="1" parent="1">
+      <mxGeometry x="1285" y="260" width="24" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="leg6t" value="🎫 Comprador flow" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1317" y="258" width="190" height="20" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leg7" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;" vertex="1" parent="1">
+      <mxGeometry x="1285" y="286" width="24" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="leg7t" value="🏪 Vendedor flow" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1317" y="284" width="190" height="20" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leg8_line" value="" style="endArrow=open;endFill=0;dashed=1;strokeColor=#FF6600;strokeWidth=1.5;" edge="1" parent="1">
+      <mxGeometry x="1285" y="312" width="24" height="16" as="geometry">
+        <mxPoint x="1285" y="312" as="sourcePoint" />
+        <mxPoint x="1309" y="312" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="leg8t" value="Cross-table access (decrement/restore seats)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1317" y="302" width="240" height="20" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leg9" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e1040;strokeColor=#7c3aed;" vertex="1" parent="1">
+      <mxGeometry x="1285" y="334" width="24" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="leg9t" value="Role-protected endpoint" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1317" y="332" width="190" height="20" as="geometry" />
     </mxCell>
 
   </root>
