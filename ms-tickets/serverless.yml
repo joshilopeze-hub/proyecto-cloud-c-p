@@ -11,6 +11,7 @@ provider:
   environment:
     TICKETS_TABLE: ${self:service}-tickets-${sls:stage}
     MS_EVENTOS_URL: ${ssm:/boletealo/ms_eventos_url}
+    JWT_SECRET: ${ssm:/boletealo/jwt_secret}
   httpApi:
     cors: true
 

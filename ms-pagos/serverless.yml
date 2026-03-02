@@ -11,6 +11,7 @@ provider:
   environment:
     PAGOS_TABLE: ${self:service}-pagos-${sls:stage}
     MS_TICKETS_URL: ${ssm:/boletealo/ms_tickets_url}
+    JWT_SECRET: ${ssm:/boletealo/jwt_secret}
   httpApi:
     cors: true
 

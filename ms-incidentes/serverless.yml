@@ -11,6 +11,7 @@ provider:
   environment:
     INCIDENTES_TABLE: ${self:service}-incidentes-${sls:stage}
     EVIDENCIAS_BUCKET: ${self:service}-evidencias-${sls:stage}
+    JWT_SECRET: ${ssm:/boletealo/jwt_secret}
   httpApi:
     cors: true
 
