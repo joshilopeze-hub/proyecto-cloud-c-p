@@ -19,7 +19,7 @@ export default function Registro({ onLogin }) {
     try {
       const res = await authApi.register(form)
       if (res.token) {
-        onLogin(res.usuario, res.token)
+        onLogin(res.user, res.token)
         navigate("/eventos")
       } else {
         setError(res.error || "Error al registrar usuario")

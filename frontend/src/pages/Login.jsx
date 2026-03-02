@@ -15,7 +15,7 @@ export default function Login({ onLogin }) {
     try {
       const res = await authApi.login(form.email, form.password)
       if (res.token) {
-        onLogin(res.usuario, res.token)
+        onLogin(res.user, res.token)
         navigate("/eventos")
       } else {
         setError(res.error || "Credenciales incorrectas")
