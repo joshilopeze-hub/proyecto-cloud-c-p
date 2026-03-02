@@ -54,7 +54,7 @@ export default function Eventos() {
 
       <div style={styles.grid}>
         {eventos.map((evento) => (
-          <EventoCard key={evento.evento_id} evento={evento} />
+          <EventoCard key={evento.eventoId || evento.evento_id} evento={evento} />
         ))}
       </div>
     </div>
@@ -85,7 +85,7 @@ function EventoCard({ evento }) {
         <p style={styles.cardInfo}>🎤 {evento.artista || evento.descripcion}</p>
         <div style={styles.cardFooter}>
           <span style={styles.precio}>Desde S/ {Number(precioMin).toFixed(2)}</span>
-          <Link to={`/comprar/${evento.evento_id}`} style={styles.btnComprar}>
+          <Link to={`/comprar/${evento.eventoId || evento.evento_id}`} style={styles.btnComprar}>
             Comprar
           </Link>
         </div>
