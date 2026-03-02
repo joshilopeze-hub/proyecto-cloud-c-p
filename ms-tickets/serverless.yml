@@ -9,18 +9,10 @@ provider:
   iam:
     role: arn:aws:iam::${aws:accountId}:role/LabRole
   environment:
-    DB_SECRET_ARN: !Ref AuroraSecret
-    DB_CLUSTER_ARN: !Sub "arn:aws:rds:us-east-1:${AWS::AccountId}:cluster:boletealo-tickets-cluster-${sls:stage}"
-    DB_NAME: boletealo_tickets
+    TICKETS_TABLE: ${self:service}-tickets-${sls:stage}
     MS_EVENTOS_URL: ${ssm:/boletealo/ms_eventos_url}
   httpApi:
     cors: true
-  vpc:
-    securityGroupIds:
-      - !Ref LambdaSecurityGroup
-    subnetIds:
-      - !Ref PrivateSubnet1
-      - !Ref PrivateSubnet2
 
 functions:
   buyTicket:
@@ -47,99 +39,28 @@ functions:
           path: /tickets/{ticketId}
           method: GET
 
-  initDb:
-    handler: handler.init_db
-    timeout: 60
-    description: "Inicializar esquema de base de datos (ejecutar una vez)"
-
 resources:
   Resources:
-    # VPC para Aurora
-    BoletealoVPC:
-      Type: AWS::EC2::VPC
+    TicketsTable:
+      Type: AWS::DynamoDB::Table
       Properties:
-        CidrBlock: 10.0.0.0/16
-        EnableDnsHostnames: true
-        Tags:
-          - Key: Name
-            Value: boletealo-vpc-${sls:stage}
-
-    PrivateSubnet1:
-      Type: AWS::EC2::Subnet
-      Properties:
-        VpcId: !Ref BoletealoVPC
-        CidrBlock: 10.0.1.0/24
-        AvailabilityZone: us-east-1a
-
-    PrivateSubnet2:
-      Type: AWS::EC2::Subnet
-      Properties:
-        VpcId: !Ref BoletealoVPC
-        CidrBlock: 10.0.2.0/24
-        AvailabilityZone: us-east-1b
-
-    LambdaSecurityGroup:
-      Type: AWS::EC2::SecurityGroup
-      Properties:
-        GroupDescription: Lambda to Aurora
-        VpcId: !Ref BoletealoVPC
-
-    AuroraSecurityGroup:
-      Type: AWS::EC2::SecurityGroup
-      Properties:
-        GroupDescription: Aurora PostgreSQL
-        VpcId: !Ref BoletealoVPC
-        SecurityGroupIngress:
-          - IpProtocol: tcp
-            FromPort: 5432
-            ToPort: 5432
-            SourceSecurityGroupId: !Ref LambdaSecurityGroup
-
-    AuroraSubnetGroup:
-      Type: AWS::RDS::DBSubnetGroup
-      Properties:
-        DBSubnetGroupDescription: Subnet group para Aurora tickets
-        SubnetIds:
-          - !Ref PrivateSubnet1
-          - !Ref PrivateSubnet2
-
-    # Secret de credenciales Aurora
-    AuroraSecret:
-      Type: AWS::SecretsManager::Secret
-      Properties:
-        Name: boletealo-tickets-aurora-${sls:stage}
-        GenerateSecretString:
-          SecretStringTemplate: '{"username": "boletealo_admin"}'
-          GenerateStringKey: password
-          PasswordLength: 32
-          ExcludeCharacters: '"@/\'
-
-    # Cluster Aurora Serverless v2
-    AuroraCluster:
-      Type: AWS::RDS::DBCluster
-      Properties:
-        DBClusterIdentifier: boletealo-tickets-cluster-${sls:stage}
-        Engine: aurora-postgresql
-        EngineMode: provisioned
-        EngineVersion: "15.4"
-        DatabaseName: boletealo_tickets
-        MasterUsername: !Sub "{{resolve:secretsmanager:${AuroraSecret}:SecretString:username}}"
-        MasterUserPassword: !Sub "{{resolve:secretsmanager:${AuroraSecret}:SecretString:password}}"
-        DBSubnetGroupName: !Ref AuroraSubnetGroup
-        VpcSecurityGroupIds:
-          - !Ref AuroraSecurityGroup
-        EnableHttpEndpoint: true   # Data API — permite llamadas sin VPC driver
-        ServerlessV2ScalingConfiguration:
-          MinCapacity: 0.5
-          MaxCapacity: 4
-
-    AuroraInstance:
-      Type: AWS::RDS::DBInstance
-      Properties:
-        DBClusterIdentifier: !Ref AuroraCluster
-        DBInstanceClass: db.serverless
-        Engine: aurora-postgresql
-        PubliclyAccessible: false
+        TableName: ${self:provider.environment.TICKETS_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: ticketId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ticketId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: userId-index
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
 
 plugins:
   - serverless-python-requirements

@@ -9,9 +9,7 @@ provider:
   iam:
     role: arn:aws:iam::${aws:accountId}:role/LabRole
   environment:
-    DB_SECRET_ARN: ${ssm:/boletealo/pagos_secret_arn}
-    DB_CLUSTER_ARN: ${ssm:/boletealo/pagos_cluster_arn}
-    DB_NAME: boletealo_pagos
+    PAGOS_TABLE: ${self:service}-pagos-${sls:stage}
     MS_TICKETS_URL: ${ssm:/boletealo/ms_tickets_url}
   httpApi:
     cors: true
@@ -33,10 +31,28 @@ functions:
           path: /pagos/{pagoId}
           method: GET
 
-  initDb:
-    handler: handler.init_db
-    timeout: 60
-    description: "Inicializar esquema de base de datos (ejecutar una vez)"
+resources:
+  Resources:
+    PagosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.PAGOS_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: pagoId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pagoId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: userId-index
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
 
 plugins:
   - serverless-python-requirements
