@@ -75,7 +75,7 @@ export default function ComprarTicket() {
         ? { metodo: "tarjeta", numero_tarjeta: pagoForm.numero_tarjeta, cvv: pagoForm.cvv, nombre_tarjeta: pagoForm.nombre_tarjeta }
         : { metodo: "yape", numero_yape: pagoForm.numero_yape, codigo_yape: pagoForm.codigo_yape }
 
-      const res = await pagosApi.procesar({ ticket_id: ticket.ticket_id, ...datos })
+      const res = await pagosApi.procesar({ ticket_id: ticket.ticket_id, monto: ticket.precio_total, ...datos })
       if (res.pago?.estado === "aprobado") {
         setPagoResult(res.pago)
         setStep(3)
