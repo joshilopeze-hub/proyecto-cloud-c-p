@@ -31,8 +31,8 @@ export default function ComprarTicket() {
   useEffect(() => {
     eventosApi.get(eventoId)
       .then((res) => {
-        // La API puede devolver { evento: {...} } o el objeto directo
-        const ev = res.evento || res
+        // La API devuelve el objeto directamente con campo eventoId
+        const ev = res.eventoId ? res : (res.evento || res)
         setEvento(ev)
         const zonas = ev.zonas || []
         if (zonas.length > 0) setZonaSeleccionada(zonas[0])
@@ -46,10 +46,10 @@ export default function ComprarTicket() {
     setLoading(true)
     try {
       const res = await ticketsApi.buy({
-        evento_id: evento.evento_id || eventoId,
-        evento_nombre: evento.nombre || evento.evento_nombre || "",
-        evento_fecha: evento.fecha || evento.evento_fecha || "",
-        evento_lugar: evento.lugar || evento.evento_lugar || "",
+        evento_id: evento.eventoId || evento.evento_id || eventoId,
+        evento_nombre: evento.nombre || "",
+        evento_fecha: evento.fecha || "",
+        evento_lugar: evento.lugar || "",
         zona: zonaSeleccionada.nombre,
         cantidad,
         precio_unit: Number(zonaSeleccionada.precio),
