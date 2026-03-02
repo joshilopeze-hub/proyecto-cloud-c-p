@@ -1,0 +1,66 @@
+service: boletealo-ms-eventos
+
+frameworkVersion: "4"
+
+provider:
+  name: aws
+  runtime: python3.12
+  region: us-east-1
+  iam:
+    role: arn:aws:iam::${aws:accountId}:role/LabRole
+  environment:
+    EVENTOS_TABLE: ${self:service}-eventos-${sls:stage}
+  httpApi:
+    cors: true
+
+functions:
+  listEventos:
+    handler: handler.list_eventos
+    events:
+      - httpApi:
+          path: /events
+          method: GET
+
+  getEvento:
+    handler: handler.get_evento
+    events:
+      - httpApi:
+          path: /events/{eventoId}
+          method: GET
+
+  createEvento:
+    handler: handler.create_evento
+    events:
+      - httpApi:
+          path: /events
+          method: POST
+
+resources:
+  Resources:
+    EventosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.EVENTOS_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: eventoId
+            AttributeType: S
+          - AttributeName: categoria
+            AttributeType: S
+        KeySchema:
+          - AttributeName: eventoId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: categoria-index
+            KeySchema:
+              - AttributeName: categoria
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: false

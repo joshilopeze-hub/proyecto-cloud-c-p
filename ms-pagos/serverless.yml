@@ -1,0 +1,46 @@
+service: boletealo-ms-pagos
+
+frameworkVersion: "4"
+
+provider:
+  name: aws
+  runtime: python3.12
+  region: us-east-1
+  iam:
+    role: arn:aws:iam::${aws:accountId}:role/LabRole
+  environment:
+    DB_SECRET_ARN: ${ssm:/boletealo/pagos_secret_arn}
+    DB_CLUSTER_ARN: ${ssm:/boletealo/pagos_cluster_arn}
+    DB_NAME: boletealo_pagos
+    MS_TICKETS_URL: ${ssm:/boletealo/ms_tickets_url}
+  httpApi:
+    cors: true
+
+functions:
+  procesarPago:
+    handler: handler.procesar_pago
+    timeout: 30
+    events:
+      - httpApi:
+          path: /pagos/procesar
+          method: POST
+
+  getPago:
+    handler: handler.get_pago
+    timeout: 15
+    events:
+      - httpApi:
+          path: /pagos/{pagoId}
+          method: GET
+
+  initDb:
+    handler: handler.init_db
+    timeout: 60
+    description: "Inicializar esquema de base de datos (ejecutar una vez)"
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: false

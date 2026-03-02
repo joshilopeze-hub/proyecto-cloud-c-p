@@ -1,0 +1,51 @@
+service: boletealo-frontend
+
+frameworkVersion: "4"
+
+provider:
+  name: aws
+  region: us-east-1
+  iam:
+    role: arn:aws:iam::${aws:accountId}:role/LabRole
+
+plugins:
+  - serverless-s3-sync
+
+custom:
+  bucketName: boletealo-frontend-${sls:stage}-${aws:accountId}
+  s3Sync:
+    - bucketName: ${self:custom.bucketName}
+      localDir: dist
+      acl: public-read
+      deleteRemoved: true
+
+resources:
+  Resources:
+    FrontendBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucketName}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          BlockPublicPolicy: false
+          IgnorePublicAcls: false
+          RestrictPublicBuckets: false
+        WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: index.html
+
+    FrontendBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref FrontendBucket
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal: "*"
+              Action: s3:GetObject
+              Resource: !Sub "${FrontendBucket.Arn}/*"
+
+  Outputs:
+    WebsiteURL:
+      Value: !GetAtt FrontendBucket.WebsiteURL
+      Description: URL del sitio web de Boletealo

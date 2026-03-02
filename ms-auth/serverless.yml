@@ -1,0 +1,67 @@
+service: boletealo-ms-auth
+
+frameworkVersion: "4"
+
+provider:
+  name: aws
+  runtime: python3.12
+  region: us-east-1
+  iam:
+    role: arn:aws:iam::${aws:accountId}:role/LabRole
+  environment:
+    USERS_TABLE: ${self:service}-users-${sls:stage}
+    JWT_SECRET: ${ssm:/boletealo/jwt_secret}
+  httpApi:
+    cors: true
+
+functions:
+  register:
+    handler: handler.register
+    events:
+      - httpApi:
+          path: /auth/register
+          method: POST
+
+  login:
+    handler: handler.login
+    events:
+      - httpApi:
+          path: /auth/login
+          method: POST
+
+  me:
+    handler: handler.me
+    events:
+      - httpApi:
+          path: /auth/me
+          method: GET
+
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.USERS_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: email-index
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: false
