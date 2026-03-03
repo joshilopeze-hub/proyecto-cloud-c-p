@@ -78,12 +78,19 @@ def create_incidente(event, context):
 
         body = json.loads(event.get("body") or "{}")
 
-        required = ["ticketId", "eventoNombre", "fechaIncidente", "horaIncidente", "lugar", "tipoProblema", "descripcion"]
-        for field in required:
-            if not body.get(field):
-                return response(400, {"error": f"Campo requerido: {field}"})
+        # Aceptar tanto snake_case (frontend) como camelCase
+        ticket_id    = body.get("ticket_id") or body.get("ticketId")
+        tipo         = body.get("tipo_problema") or body.get("tipoProblema")
+        descripcion  = body.get("descripcion", "")
 
-        if len(body["descripcion"]) < 20:
+        if not ticket_id:
+            return response(400, {"error": "Campo requerido: ticket_id"})
+        if not tipo:
+            return response(400, {"error": "Campo requerido: tipo_problema"})
+        if not descripcion:
+            return response(400, {"error": "Campo requerido: descripcion"})
+
+        if len(descripcion) < 20:
             return response(400, {"error": "La descripción debe tener al menos 20 caracteres"})
 
         incidente_id = str(uuid.uuid4())
@@ -94,14 +101,14 @@ def create_incidente(event, context):
             "userId":        user["userId"],
             "userEmail":     user["email"],
             "userName":      user["nombre"],
-            "ticketId":      body["ticketId"],
-            "eventoNombre":  body["eventoNombre"],
-            "fechaIncidente":body["fechaIncidente"],
-            "horaIncidente": body["horaIncidente"],
-            "lugar":         body["lugar"],
-            "tipoProblema":  body["tipoProblema"],
-            "descripcion":   body["descripcion"],
-            "evidencias":    body.get("evidencias", []),  # lista de keys S3
+            "ticketId":      ticket_id,
+            "eventoNombre":  body.get("eventoNombre", ""),
+            "fechaIncidente":body.get("fechaIncidente", ""),
+            "horaIncidente": body.get("horaIncidente", ""),
+            "lugar":         body.get("lugar", ""),
+            "tipoProblema":  tipo,
+            "descripcion":   descripcion,
+            "evidencias":    body.get("evidencias", []),
             "estado":        "abierto",
             "createdAt":     now,
             "updatedAt":     now,

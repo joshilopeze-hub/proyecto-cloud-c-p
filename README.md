@@ -276,6 +276,34 @@ cd frontend && npm run build && \
 
 ---
 
+## 💰 Estimación de Costos AWS
+
+**Región:** US East (N. Virginia) | **Escenario:** Moderado (~100,000 requests/mes) | **Fuente:** [AWS Pricing Calculator](https://calculator.aws)
+
+| # | Servicio AWS | Descripción | Costo Mensual |
+|---|---|---|---|
+| 1 | **AWS Lambda** | 5 funciones · 100K req/mes · 500ms · 128MB RAM | $0.00 |
+| 2 | **Amazon API Gateway** | 5 HTTP APIs · 100K req/mes | $0.10 |
+| 3 | **Amazon DynamoDB** | 5 tablas on-demand · 0.5 GB · 100K writes · 300K reads | $0.21 |
+| 4 | **Amazon S3** | Frontend estático + bucket evidencias · ~1 GB | $0.03 |
+| 5 | **AWS SSM Parameter Store** | 3 parámetros standard (jwt_secret, urls inter-servicios) | $0.00 |
+| | **TOTAL** | | **$0.34 USD/mes** |
+| | **Total anual** | | **$4.08 USD/año** |
+
+**Lambda ($0.00):** 100K invocaciones/mes con 128MB y 500ms = ~6,250 GB-s, muy por debajo del free tier de 400,000 GB-s/mes. Sin costo.
+
+**API Gateway ($0.10):** 5 HTTP APIs a $1.00/millón de requests. 100K requests = $0.10. Se usó HTTP API (70% más barato que REST API).
+
+**DynamoDB ($0.21):** Modo on-demand (PAY_PER_REQUEST), ideal para tráfico variable. Costo por 0.5 GB almacenado + unidades de lectura/escritura consumidas.
+
+**S3 ($0.03):** Bucket del frontend React (~5 MB) + bucket de evidencias de incidentes (~1 GB). Free tier cubre primeros 5 GB.
+
+**SSM Parameter Store ($0.00):** 3 parámetros Standard (gratuitos hasta 10,000 parámetros).
+
+> La arquitectura serverless escala automáticamente. El costo crece de forma lineal: ~$3.50/mes a 1M requests, ~$35.00/mes a 10M requests.
+
+---
+
 ## ✅ Funcionalidades implementadas
 
 **Autenticación y roles:**
