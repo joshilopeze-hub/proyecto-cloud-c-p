@@ -57,18 +57,20 @@ export default function MisIncidentes() {
           )}
           {incidentes.map((inc) => (
             <div
-              key={inc.incidente_id}
-              onClick={() => verDetalle(inc.incidente_id)}
-              style={{ ...styles.incCard, ...(seleccionado?.incidente_id === inc.incidente_id ? styles.incCardActive : {}) }}
+              key={inc.incidenteId}
+              onClick={() => verDetalle(inc.incidenteId)}
+              style={{ ...styles.incCard, ...(seleccionado?.incidenteId === inc.incidenteId ? styles.incCardActive : {}) }}
             >
               <div style={styles.incHeader}>
-                <span style={styles.incTipo}>{TIPO_LABEL[inc.tipo_problema] || inc.tipo_problema}</span>
+                <span style={styles.incTipo}>{TIPO_LABEL[inc.tipoProblema] || inc.tipoProblema}</span>
                 <span style={{ ...styles.incEstado, color: ESTADO_COLOR[inc.estado] || "#aaa" }}>
                   ● {inc.estado?.replace("_", " ")}
                 </span>
               </div>
               <p style={styles.incDesc}>{inc.descripcion?.slice(0, 80)}...</p>
-              <small style={styles.incFecha}>{new Date(inc.created_at).toLocaleDateString("es-PE")}</small>
+              <small style={styles.incFecha}>
+                {inc.createdAt ? new Date(inc.createdAt).toLocaleDateString("es-PE") : "—"}
+              </small>
             </div>
           ))}
         </div>
@@ -82,7 +84,7 @@ export default function MisIncidentes() {
             </div>
             <div style={styles.detalleField}>
               <label style={styles.detalleLabel}>Tipo</label>
-              <p style={styles.detalleValue}>{TIPO_LABEL[seleccionado.tipo_problema] || seleccionado.tipo_problema}</p>
+              <p style={styles.detalleValue}>{TIPO_LABEL[seleccionado.tipoProblema] || seleccionado.tipoProblema}</p>
             </div>
             <div style={styles.detalleField}>
               <label style={styles.detalleLabel}>Estado</label>
@@ -92,7 +94,7 @@ export default function MisIncidentes() {
             </div>
             <div style={styles.detalleField}>
               <label style={styles.detalleLabel}>Ticket</label>
-              <p style={{ ...styles.detalleValue, color: "#e94560" }}>{seleccionado.ticket_id}</p>
+              <p style={{ ...styles.detalleValue, color: "#e94560" }}>{seleccionado.ticketId}</p>
             </div>
             <div style={styles.detalleField}>
               <label style={styles.detalleLabel}>Descripción</label>
@@ -101,7 +103,7 @@ export default function MisIncidentes() {
             <div style={styles.detalleField}>
               <label style={styles.detalleLabel}>Fecha de reporte</label>
               <p style={styles.detalleValue}>
-                {new Date(seleccionado.created_at).toLocaleString("es-PE")}
+                {seleccionado.createdAt ? new Date(seleccionado.createdAt).toLocaleString("es-PE") : "—"}
               </p>
             </div>
             {seleccionado.evidencias?.length > 0 && (
