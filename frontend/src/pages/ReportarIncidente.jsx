@@ -30,8 +30,12 @@ export default function ReportarIncidente() {
     try {
       let evidencias = []
       if (archivo) {
-        const s3Key = await incidentesApi.uploadFile(archivo)
-        evidencias = [{ s3Key, nombre: archivo.name, tipo: archivo.type }]
+        try {
+          const s3Key = await incidentesApi.uploadFile(archivo)
+          if (s3Key) evidencias = [{ s3Key, nombre: archivo.name, tipo: archivo.type }]
+        } catch {
+          // Si falla el upload de evidencia, continuamos sin ella
+        }
       }
       const res = await incidentesApi.create({
         ticket_id: ticketId,
@@ -39,13 +43,13 @@ export default function ReportarIncidente() {
         descripcion: form.descripcion,
         evidencias,
       })
-      if (res.incidente_id || res.incidente) {
+      if (res.incidenteId || res.incidente_id || res.incidente || res.message) {
         setExito(true)
       } else {
         setError(res.error || "Error al crear el incidente")
       }
-    } catch {
-      setError("Error de conexión. Intenta nuevamente.")
+    } catch (err) {
+      setError("Error de conexión: " + (err?.message || "Intenta nuevamente."))
     } finally {
       setLoading(false)
     }
